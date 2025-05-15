@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlphaText - محرر النصوص</title>
+    <!-- Google Fonts - Arabic -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&family=Almarai:wght@400;700&family=Amiri:wght@400;700&family=Changa:wght@400;700&family=El+Messiri:wght@400;700&family=Lateef&family=Reem+Kufi&family=Scheherazade+New:wght@400;700&display=swap">
+    <!-- Google Fonts - English -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@400;700&family=Ubuntu:wght@400;700&display=swap">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <div class="app-title">
+                <img src="logo.png" alt="AlphaText Logo" class="logo" id="appLogo">
+                <h1 id="documentTitle">AlphaText</h1>
+            </div>
+
+            <div class="document-controls">
+                <button onclick="createNewDocument()" class="doc-btn"><i class="fa-solid fa-file"></i> جديد</button>
+                <button onclick="renameDocument()" class="doc-btn"><i class="fa-solid fa-pen"></i> تسمية</button>
+                <button onclick="openDocumentsDialog()" class="doc-btn"><i class="fa-solid fa-folder-open"></i> فتح</button>
+                <span id="lastSaved" class="last-saved">آخر حفظ: --:--</span>
+            </div>
+
+
+        </div>
+
+        <div class="ribbon">
+            <div class="ribbon-tabs">
+                <div class="ribbon-tab active" data-tab="home">الصفحة الرئيسية</div>
+                <div class="ribbon-tab" data-tab="insert">إدراج</div>
+                <div class="ribbon-tab" data-tab="layout">تخطيط</div>
+                <div class="ribbon-tab" data-tab="references">مراجع</div>
+                <div class="ribbon-tab" data-tab="review">تدقيق</div>
+                <div class="ribbon-tab" data-tab="view">عرض</div>
+            </div>
+
+            <div class="ribbon-content">
+                <!-- الصفحة الرئيسية -->
+                <div class="ribbon-panel active" id="home-panel">
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <div class="font-selector">
+                                <select id="fontName" class="toolbar-item">
+                                    <optgroup label="الخطوط العربية">
+                                        <option value="Cairo">Cairo</option>
+                                        <option value="Tajawal">Tajawal</option>
+                                        <option value="Almarai">Almarai</option>
+                                        <option value="Amiri">Amiri</option>
+                                        <option value="Changa">Changa</option>
+                                        <option value="El Messiri">El Messiri</option>
+                                        <option value="Lateef">Lateef</option>
+                                        <option value="Reem Kufi">Reem Kufi</option>
+                                        <option value="Scheherazade New">Scheherazade New</option>
+                                    </optgroup>
+                                    <optgroup label="الخطوط الإنجليزية">
+                                        <option value="Arial">Arial</option>
+                                        <option value="Verdana">Verdana</option>
+                                        <option value="Tahoma">Tahoma</option>
+                                        <option value="Times New Roman">Times New Roman</option>
+                                        <option value="Georgia">Georgia</option>
+                                        <option value="Courier New">Courier New</option>
+                                        <option value="Roboto">Roboto</option>
+                                        <option value="Open Sans">Open Sans</option>
+                                        <option value="Lato">Lato</option>
+                                        <option value="Montserrat">Montserrat</option>
+                                        <option value="Poppins">Poppins</option>
+                                        <option value="Raleway">Raleway</option>
+                                        <option value="Playfair Display">Playfair Display</option>
+                                        <option value="Source Sans Pro">Source Sans Pro</option>
+                                        <option value="Ubuntu">Ubuntu</option>
+                                    </optgroup>
+                                </select>
+                                <button onclick="showFontPreview()" class="toolbar-btn font-preview-btn" title="معاينة الخطوط"><i class="fa-solid fa-eye"></i></button>
+                            </div>
+                            <select id="fontSize" class="toolbar-item">
+                                <option value="1">8pt</option>
+                                <option value="2">10pt</option>
+                                <option value="3">12pt</option>
+                                <option value="4" selected>14pt</option>
+                                <option value="5">18pt</option>
+                                <option value="6">24pt</option>
+                                <option value="7">36pt</option>
+                            </select>
+                        </div>
+                        <div class="ribbon-group-title">خط</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <div class="button-group">
+                                <button onclick="formatDoc('bold')" class="toolbar-btn"><i class="fa-solid fa-bold"></i></button>
+                                <button onclick="formatDoc('italic')" class="toolbar-btn"><i class="fa-solid fa-italic"></i></button>
+                                <button onclick="formatDoc('underline')" class="toolbar-btn"><i class="fa-solid fa-underline"></i></button>
+                                <button onclick="formatDoc('strikethrough')" class="toolbar-btn"><i class="fa-solid fa-strikethrough"></i></button>
+                            </div>
+                            <div class="color-controls">
+                                <input type="color" id="foreColor" onchange="formatDoc('foreColor', this.value)" class="toolbar-item color-picker" title="لون النص">
+                                <input type="color" id="backColor" onchange="formatDoc('backColor', this.value)" class="toolbar-item color-picker" title="لون الخلفية">
+                            </div>
+                        </div>
+                        <div class="ribbon-group-title">تنسيق</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <div class="button-group">
+                                <button onclick="formatDoc('justifyRight')" class="toolbar-btn"><i class="fa-solid fa-align-right"></i></button>
+                                <button onclick="formatDoc('justifyCenter')" class="toolbar-btn"><i class="fa-solid fa-align-center"></i></button>
+                                <button onclick="formatDoc('justifyLeft')" class="toolbar-btn"><i class="fa-solid fa-align-left"></i></button>
+                                <button onclick="formatDoc('justifyFull')" class="toolbar-btn"><i class="fa-solid fa-align-justify"></i></button>
+                            </div>
+                            <div class="button-group">
+                                <button onclick="formatDoc('insertUnorderedList')" class="toolbar-btn"><i class="fa-solid fa-list-ul"></i></button>
+                                <button onclick="formatDoc('insertOrderedList')" class="toolbar-btn"><i class="fa-solid fa-list-ol"></i></button>
+                                <button onclick="openAdvancedListDialog()" class="toolbar-btn" title="قوائم متقدمة"><i class="fa-solid fa-list-check"></i></button>
+                                <button onclick="formatDoc('outdent')" class="toolbar-btn"><i class="fa-solid fa-outdent"></i></button>
+                                <button onclick="formatDoc('indent')" class="toolbar-btn"><i class="fa-solid fa-indent"></i></button>
+                            </div>
+                            <button onclick="openParagraphDialog()" class="toolbar-btn" title="تنسيق الفقرة"><i class="fa-solid fa-paragraph"></i></button>
+                        </div>
+                        <div class="ribbon-group-title">فقرة</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <select id="styleSelector" class="toolbar-item" onchange="applyStyle(this.value)">
+                                <option value="normal">عادي</option>
+                                <option value="heading1">عنوان 1</option>
+                                <option value="heading2">عنوان 2</option>
+                                <option value="heading3">عنوان 3</option>
+                                <option value="quote">اقتباس</option>
+                                <option value="code">كود</option>
+                            </select>
+                            <button onclick="openStylesDialog()" class="toolbar-btn" title="تحرير الأنماط"><i class="fa-solid fa-paint-roller"></i></button>
+                            <button onclick="openTemplatesDialog()" class="toolbar-btn" title="قوالب جاهزة"><i class="fa-solid fa-file-invoice"></i></button>
+                            <button onclick="openDocumentStylesDialog()" class="toolbar-btn" title="أنماط المستند"><i class="fa-solid fa-palette"></i></button>
+                        </div>
+                        <div class="ribbon-group-title">أنماط</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="undo()" class="toolbar-btn"><i class="fa-solid fa-undo"></i> تراجع</button>
+                            <button onclick="redo()" class="toolbar-btn"><i class="fa-solid fa-redo"></i> إعادة</button>
+                            <button onclick="openFindReplace()" class="toolbar-btn"><i class="fa-solid fa-search"></i> بحث</button>
+                        </div>
+                        <div class="ribbon-group-title">تحرير</div>
+                    </div>
+                </div>
+
+                <!-- إدراج -->
+                <div class="ribbon-panel" id="insert-panel">
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="insertTable()" class="toolbar-btn"><i class="fa-solid fa-table"></i> جدول</button>
+                        </div>
+                        <div class="ribbon-group-title">جدول</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="insertImage()" class="toolbar-btn"><i class="fa-solid fa-image"></i> صورة</button>
+                            <button onclick="insertShape()" class="toolbar-btn"><i class="fa-solid fa-shapes"></i> شكل</button>
+                            <button onclick="insertSymbol()" class="toolbar-btn"><i class="fa-solid fa-omega"></i> رمز</button>
+                        </div>
+                        <div class="ribbon-group-title">توضيحي</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="insertHyperlink()" class="toolbar-btn"><i class="fa-solid fa-link"></i> رابط</button>
+                            <button onclick="insertBookmark()" class="toolbar-btn"><i class="fa-solid fa-bookmark"></i> إشارة مرجعية</button>
+                        </div>
+                        <div class="ribbon-group-title">روابط</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="addComment()" class="toolbar-btn"><i class="fa-solid fa-comment"></i> تعليق</button>
+                            <button onclick="insertFootnote()" class="toolbar-btn"><i class="fa-solid fa-asterisk"></i> حاشية سفلية</button>
+                        </div>
+                        <div class="ribbon-group-title">تعليق</div>
+                    </div>
+                </div>
+
+                <!-- تخطيط -->
+                <div class="ribbon-panel" id="layout-panel">
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="openPageSetupDialog()" class="toolbar-btn"><i class="fa-solid fa-file-lines"></i> هوامش</button>
+                            <div class="button-group">
+                                <button onclick="setPageOrientation('portrait')" class="toolbar-btn"><i class="fa-solid fa-file-lines"></i> عمودي</button>
+                                <button onclick="setPageOrientation('landscape')" class="toolbar-btn"><i class="fa-solid fa-file-lines fa-rotate-90"></i> أفقي</button>
+                            </div>
+                            <select id="pageSize" class="toolbar-item" onchange="setPageSize(this.value)">
+                                <option value="a4">A4</option>
+                                <option value="letter">Letter</option>
+                                <option value="legal">Legal</option>
+                                <option value="a3">A3</option>
+                            </select>
+                            <button onclick="openWatermarkDialog()" class="toolbar-btn" title="علامة مائية"><i class="fa-solid fa-tint"></i></button>
+                        </div>
+                        <div class="ribbon-group-title">إعداد الصفحة</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="insertPageBreak()" class="toolbar-btn"><i class="fa-solid fa-file-lines"></i> فاصل صفحة</button>
+                            <button onclick="insertSectionBreak()" class="toolbar-btn"><i class="fa-solid fa-grip-lines"></i> فاصل مقطع</button>
+                        </div>
+                        <div class="ribbon-group-title">فواصل</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="insertPageNumbers()" class="toolbar-btn"><i class="fa-solid fa-list-ol"></i> ترقيم</button>
+                            <button onclick="openHeaderFooterDialog()" class="toolbar-btn"><i class="fa-solid fa-file-header"></i> الرأس والتذييل</button>
+                        </div>
+                        <div class="ribbon-group-title">ترقيم الصفحات</div>
+                    </div>
+                </div>
+
+                <!-- مراجع -->
+                <div class="ribbon-panel" id="references-panel">
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="insertTableOfContents()" class="toolbar-btn"><i class="fa-solid fa-list"></i> إدراج</button>
+                            <button onclick="updateTableOfContents()" class="toolbar-btn"><i class="fa-solid fa-arrows-rotate"></i> تحديث</button>
+                        </div>
+                        <div class="ribbon-group-title">جدول المحتويات</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="insertFootnote()" class="toolbar-btn"><i class="fa-solid fa-asterisk"></i> حاشية سفلية</button>
+                            <button onclick="insertEndnote()" class="toolbar-btn"><i class="fa-solid fa-book"></i> حاشية ختامية</button>
+                        </div>
+                        <div class="ribbon-group-title">حواشي</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="insertCitation()" class="toolbar-btn"><i class="fa-solid fa-quote-right"></i> إدراج اقتباس</button>
+                            <button onclick="insertBibliography()" class="toolbar-btn"><i class="fa-solid fa-book"></i> المراجع</button>
+                        </div>
+                        <div class="ribbon-group-title">اقتباسات</div>
+                    </div>
+                </div>
+
+                <!-- تدقيق -->
+                <div class="ribbon-panel" id="review-panel">
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="toggleSpellCheck()" class="toolbar-btn" id="spellCheckBtn"><i class="fa-solid fa-spell-check"></i> <span id="spellCheckText">إيقاف التدقيق الإملائي</span></button>
+                            <button onclick="checkGrammar()" class="toolbar-btn"><i class="fa-solid fa-check-double"></i> تدقيق نحوي</button>
+                        </div>
+                        <div class="ribbon-group-title">تدقيق</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="addComment()" class="toolbar-btn"><i class="fa-solid fa-comment"></i> إضافة تعليق</button>
+                            <button onclick="toggleComments()" class="toolbar-btn" id="toggleCommentsBtn"><i class="fa-solid fa-comments"></i> <span id="toggleCommentsText">إخفاء التعليقات</span></button>
+                        </div>
+                        <div class="ribbon-group-title">تعليقات</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="toggleTrackChanges()" class="toolbar-btn" id="trackChangesBtn"><i class="fa-solid fa-highlighter"></i> <span id="trackChangesText">تتبع التغييرات</span></button>
+                            <button onclick="acceptAllChanges()" class="toolbar-btn"><i class="fa-solid fa-check"></i> قبول الكل</button>
+                            <button onclick="rejectAllChanges()" class="toolbar-btn"><i class="fa-solid fa-xmark"></i> رفض الكل</button>
+                        </div>
+                        <div class="ribbon-group-title">تغييرات</div>
+                    </div>
+                </div>
+
+                <!-- عرض -->
+                <div class="ribbon-panel" id="view-panel">
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="setViewMode('edit')" class="toolbar-btn"><i class="fa-solid fa-pen"></i> تحرير</button>
+                            <button onclick="setViewMode('read')" class="toolbar-btn"><i class="fa-solid fa-book-reader"></i> قراءة</button>
+                            <button onclick="openPrintPreview()" class="toolbar-btn"><i class="fa-solid fa-print"></i> معاينة الطباعة</button>
+                        </div>
+                        <div class="ribbon-group-title">طرق العرض</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="zoomIn()" class="toolbar-btn"><i class="fa-solid fa-magnifying-glass-plus"></i> تكبير</button>
+                            <button onclick="zoomOut()" class="toolbar-btn"><i class="fa-solid fa-magnifying-glass-minus"></i> تصغير</button>
+                            <button onclick="resetZoom()" class="toolbar-btn"><i class="fa-solid fa-magnifying-glass"></i> 100%</button>
+                        </div>
+                        <div class="ribbon-group-title">تكبير/تصغير</div>
+                    </div>
+
+                    <div class="ribbon-group">
+                        <div class="ribbon-controls">
+                            <button onclick="toggleRuler()" class="toolbar-btn" id="rulerBtn"><i class="fa-solid fa-ruler"></i> المسطرة</button>
+                            <button onclick="toggleGridlines()" class="toolbar-btn" id="gridlinesBtn"><i class="fa-solid fa-border-all"></i> خطوط الشبكة</button>
+                        </div>
+                        <div class="ribbon-group-title">إظهار</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-section">
+                <div class="font-selector">
+                    <select id="fontName" class="toolbar-item">
+                        <optgroup label="الخطوط العربية">
+                            <option value="Cairo">Cairo</option>
+                            <option value="Tajawal">Tajawal</option>
+                            <option value="Almarai">Almarai</option>
+                            <option value="Amiri">Amiri</option>
+                            <option value="Changa">Changa</option>
+                            <option value="El Messiri">El Messiri</option>
+                            <option value="Lateef">Lateef</option>
+                            <option value="Reem Kufi">Reem Kufi</option>
+                            <option value="Scheherazade New">Scheherazade New</option>
+                        </optgroup>
+                        <optgroup label="الخطوط الإنجليزية">
+                            <option value="Arial">Arial</option>
+                            <option value="Verdana">Verdana</option>
+                            <option value="Tahoma">Tahoma</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Roboto">Roboto</option>
+                            <option value="Open Sans">Open Sans</option>
+                            <option value="Lato">Lato</option>
+                            <option value="Montserrat">Montserrat</option>
+                            <option value="Poppins">Poppins</option>
+                            <option value="Raleway">Raleway</option>
+                            <option value="Playfair Display">Playfair Display</option>
+                            <option value="Source Sans Pro">Source Sans Pro</option>
+                            <option value="Ubuntu">Ubuntu</option>
+                        </optgroup>
+                    </select>
+                    <button onclick="showFontPreview()" class="toolbar-btn font-preview-btn" title="معاينة الخطوط"><i class="fa-solid fa-eye"></i></button>
+                </div>
+
+                <select id="fontSize" class="toolbar-item">
+                    <option value="1">8pt</option>
+                    <option value="2">10pt</option>
+                    <option value="3">12pt</option>
+                    <option value="4" selected>14pt</option>
+                    <option value="5">18pt</option>
+                    <option value="6">24pt</option>
+                    <option value="7">36pt</option>
+                </select>
+            </div>
+
+            <div class="toolbar-section">
+                <button onclick="formatDoc('bold')" class="toolbar-btn"><i class="fa-solid fa-bold"></i></button>
+                <button onclick="formatDoc('italic')" class="toolbar-btn"><i class="fa-solid fa-italic"></i></button>
+                <button onclick="formatDoc('underline')" class="toolbar-btn"><i class="fa-solid fa-underline"></i></button>
+                <button onclick="formatDoc('strikethrough')" class="toolbar-btn"><i class="fa-solid fa-strikethrough"></i></button>
+            </div>
+
+            <div class="toolbar-section">
+                <button onclick="formatDoc('justifyRight')" class="toolbar-btn"><i class="fa-solid fa-align-right"></i></button>
+                <button onclick="formatDoc('justifyCenter')" class="toolbar-btn"><i class="fa-solid fa-align-center"></i></button>
+                <button onclick="formatDoc('justifyLeft')" class="toolbar-btn"><i class="fa-solid fa-align-left"></i></button>
+                <button onclick="formatDoc('justifyFull')" class="toolbar-btn"><i class="fa-solid fa-align-justify"></i></button>
+                <button onclick="openParagraphDialog()" class="toolbar-btn" title="تنسيق الفقرة"><i class="fa-solid fa-paragraph"></i></button>
+            </div>
+
+            <div class="toolbar-section">
+                <button onclick="formatDoc('insertUnorderedList')" class="toolbar-btn"><i class="fa-solid fa-list-ul"></i></button>
+                <button onclick="formatDoc('insertOrderedList')" class="toolbar-btn"><i class="fa-solid fa-list-ol"></i></button>
+                <button onclick="formatDoc('outdent')" class="toolbar-btn"><i class="fa-solid fa-outdent"></i></button>
+                <button onclick="formatDoc('indent')" class="toolbar-btn"><i class="fa-solid fa-indent"></i></button>
+            </div>
+
+            <div class="toolbar-section">
+                <input type="color" id="foreColor" onchange="formatDoc('foreColor', this.value)" class="toolbar-item color-picker">
+                <input type="color" id="backColor" onchange="formatDoc('backColor', this.value)" class="toolbar-item color-picker">
+                <button onclick="openPageSetupDialog()" class="toolbar-btn" title="إعدادات الصفحة"><i class="fa-solid fa-file-lines"></i></button>
+            </div>
+        </div>
+
+        <div id="editor" contenteditable="true" class="editor-area" spellcheck="true">
+            <p>أهلاً بك في محرر النصوص! يمكنك البدء بالكتابة هنا...</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="word-count">الكلمات: <span id="wordCount">0</span></div>
+            <div class="char-count">الأحرف: <span id="charCount">0</span></div>
+        </div>
+
+        <div class="action-buttons">
+            <button onclick="saveAsTxt()" class="action-btn"><i class="fa-solid fa-file-export"></i> حفظ كملف نصي</button>
+            <button onclick="saveAsPdf()" class="action-btn"><i class="fa-solid fa-file-pdf"></i> حفظ كملف PDF</button>
+            <button onclick="clearEditor()" class="action-btn"><i class="fa-solid fa-trash"></i> مسح المحتوى</button>
+        </div>
+
+        <div class="additional-buttons">
+            <button onclick="undo()" class="additional-btn"><i class="fa-solid fa-undo"></i> تراجع</button>
+            <button onclick="redo()" class="additional-btn"><i class="fa-solid fa-redo"></i> إعادة</button>
+            <button onclick="openFindReplace()" class="additional-btn"><i class="fa-solid fa-search"></i> بحث واستبدال</button>
+            <button onclick="insertImage()" class="additional-btn"><i class="fa-solid fa-image"></i> إدراج صورة</button>
+            <button onclick="insertTable()" class="additional-btn"><i class="fa-solid fa-table"></i> إدراج جدول</button>
+            <button onclick="toggleSpellCheck()" class="additional-btn" id="spellCheckBtn"><i class="fa-solid fa-spell-check"></i> <span id="spellCheckText">إيقاف التدقيق الإملائي</span></button>
+            <button onclick="toggleAutoSave()" class="additional-btn" id="autoSaveBtn"><i class="fa-solid fa-clock"></i> <span id="autoSaveText">تفعيل الحفظ التلقائي</span></button>
+            <button onclick="addComment()" class="additional-btn"><i class="fa-solid fa-comment"></i> إضافة تعليق</button>
+            <button onclick="toggleComments()" class="additional-btn" id="toggleCommentsBtn"><i class="fa-solid fa-comments"></i> <span id="toggleCommentsText">إخفاء التعليقات</span></button>
+            <button onclick="saveToLocalStorage()" class="additional-btn"><i class="fa-solid fa-save"></i> حفظ</button>
+            <button onclick="exportDocument()" class="additional-btn"><i class="fa-solid fa-file-export"></i> تصدير</button>
+            <button onclick="importDocument()" class="additional-btn"><i class="fa-solid fa-file-import"></i> استيراد</button>
+            <button onclick="openPrintPreview()" class="additional-btn"><i class="fa-solid fa-print"></i> معاينة الطباعة</button>
+        </div>
+
+        <!-- Find and Replace Dialog -->
+        <div id="findReplaceDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>بحث واستبدال</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="findText">بحث عن:</label>
+                        <input type="text" id="findText" class="dialog-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="replaceText">استبدال بـ:</label>
+                        <input type="text" id="replaceText" class="dialog-input">
+                    </div>
+                    <div class="dialog-buttons">
+                        <button onclick="findText()" class="dialog-btn">بحث</button>
+                        <button onclick="replaceText()" class="dialog-btn">استبدال</button>
+                        <button onclick="replaceAllText()" class="dialog-btn">استبدال الكل</button>
+                        <button onclick="closeFindReplace()" class="dialog-btn">إغلاق</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Dialog -->
+        <div id="tableDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>إدراج جدول</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="tableRows">عدد الصفوف:</label>
+                        <input type="number" id="tableRows" min="1" max="20" value="3" class="dialog-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="tableCols">عدد الأعمدة:</label>
+                        <input type="number" id="tableCols" min="1" max="10" value="3" class="dialog-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="tableHeader">
+                            <input type="checkbox" id="tableHeader" checked>
+                            إضافة صف عناوين
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="tableStyle">نمط الجدول:</label>
+                        <select id="tableStyle" class="dialog-input">
+                            <option value="default">افتراضي</option>
+                            <option value="striped">مخطط</option>
+                            <option value="borderless">بدون حدود</option>
+                            <option value="dark">داكن</option>
+                        </select>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button onclick="createTable()" class="dialog-btn">إنشاء</button>
+                        <button onclick="closeTableDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents Dialog -->
+        <div id="documentsDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>المستندات المحفوظة</h3>
+                <div class="documents-list" id="documentsList">
+                    <!-- Documents will be loaded here dynamically -->
+                    <div class="no-documents">لا توجد مستندات محفوظة</div>
+                </div>
+                <div class="dialog-buttons">
+                    <button onclick="closeDocumentsDialog()" class="dialog-btn">إغلاق</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Dialog -->
+        <div id="exportDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>تصدير المستند</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="exportFormat">اختر صيغة التصدير:</label>
+                        <select id="exportFormat" class="dialog-input">
+                            <option value="txt">نص عادي (TXT)</option>
+                            <option value="pdf">PDF</option>
+                            <option value="html">HTML</option>
+                            <option value="docx">Word (DOCX)</option>
+                        </select>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button onclick="performExport()" class="dialog-btn">تصدير</button>
+                        <button onclick="closeExportDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Setup Dialog -->
+        <div id="pageSetupDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>إعدادات الصفحة</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="pageSize">حجم الصفحة:</label>
+                        <select id="pageSize" class="dialog-input">
+                            <option value="a4">A4 (210 × 297 مم)</option>
+                            <option value="letter">Letter (8.5 × 11 بوصة)</option>
+                            <option value="legal">Legal (8.5 × 14 بوصة)</option>
+                            <option value="a3">A3 (297 × 420 مم)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pageOrientation">اتجاه الصفحة:</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="pageOrientation" value="portrait" checked> عمودي
+                            </label>
+                            <label>
+                                <input type="radio" name="pageOrientation" value="landscape"> أفقي
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>الهوامش (بالملليمتر):</label>
+                        <div class="margins-grid">
+                            <div class="margin-input">
+                                <label for="marginTop">أعلى:</label>
+                                <input type="number" id="marginTop" min="0" max="100" value="25" class="dialog-input">
+                            </div>
+                            <div class="margin-input">
+                                <label for="marginRight">يمين:</label>
+                                <input type="number" id="marginRight" min="0" max="100" value="25" class="dialog-input">
+                            </div>
+                            <div class="margin-input">
+                                <label for="marginBottom">أسفل:</label>
+                                <input type="number" id="marginBottom" min="0" max="100" value="25" class="dialog-input">
+                            </div>
+                            <div class="margin-input">
+                                <label for="marginLeft">يسار:</label>
+                                <input type="number" id="marginLeft" min="0" max="100" value="25" class="dialog-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="showPageNumbers">
+                            <input type="checkbox" id="showPageNumbers" checked>
+                            عرض أرقام الصفحات
+                        </label>
+                    </div>
+                    <div class="form-group" id="pageNumberPositionGroup">
+                        <label for="pageNumberPosition">موضع رقم الصفحة:</label>
+                        <select id="pageNumberPosition" class="dialog-input">
+                            <option value="bottom-center">أسفل الوسط</option>
+                            <option value="bottom-right">أسفل اليمين</option>
+                            <option value="bottom-left">أسفل اليسار</option>
+                            <option value="top-center">أعلى الوسط</option>
+                            <option value="top-right">أعلى اليمين</option>
+                            <option value="top-left">أعلى اليسار</option>
+                        </select>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button onclick="applyPageSetup()" class="dialog-btn">تطبيق</button>
+                        <button onclick="closePageSetupDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paragraph Format Dialog -->
+        <div id="paragraphDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>تنسيق الفقرة</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="paragraphAlignment">المحاذاة:</label>
+                        <select id="paragraphAlignment" class="dialog-input">
+                            <option value="right">يمين</option>
+                            <option value="center">وسط</option>
+                            <option value="left">يسار</option>
+                            <option value="justify">ضبط</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="lineHeight">المسافة بين السطور:</label>
+                        <select id="lineHeight" class="dialog-input">
+                            <option value="1">مفرد (1)</option>
+                            <option value="1.15">1.15</option>
+                            <option value="1.5">1.5</option>
+                            <option value="2">مزدوج (2)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المسافة البادئة (بالبكسل):</label>
+                        <div class="indent-grid">
+                            <div class="indent-input">
+                                <label for="textIndent">بداية الفقرة:</label>
+                                <input type="number" id="textIndent" min="0" max="100" value="0" class="dialog-input">
+                            </div>
+                            <div class="indent-input">
+                                <label for="paddingRight">من اليمين:</label>
+                                <input type="number" id="paddingRight" min="0" max="100" value="0" class="dialog-input">
+                            </div>
+                            <div class="indent-input">
+                                <label for="paddingLeft">من اليسار:</label>
+                                <input type="number" id="paddingLeft" min="0" max="100" value="0" class="dialog-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>المسافة بين الفقرات (بالبكسل):</label>
+                        <div class="spacing-grid">
+                            <div class="spacing-input">
+                                <label for="marginTopP">قبل الفقرة:</label>
+                                <input type="number" id="marginTopP" min="0" max="50" value="0" class="dialog-input">
+                            </div>
+                            <div class="spacing-input">
+                                <label for="marginBottomP">بعد الفقرة:</label>
+                                <input type="number" id="marginBottomP" min="0" max="50" value="0" class="dialog-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button onclick="applyParagraphFormat()" class="dialog-btn">تطبيق</button>
+                        <button onclick="closeParagraphDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comment Dialog -->
+        <div id="commentDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>إضافة تعليق</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="commentText">نص التعليق:</label>
+                        <textarea id="commentText" class="dialog-input" rows="4" placeholder="اكتب تعليقك هنا..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="commentColor">لون التعليق:</label>
+                        <select id="commentColor" class="dialog-input">
+                            <option value="#ffeb3b">أصفر</option>
+                            <option value="#4caf50">أخضر</option>
+                            <option value="#f44336">أحمر</option>
+                            <option value="#2196f3">أزرق</option>
+                            <option value="#ff9800">برتقالي</option>
+                        </select>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button onclick="insertComment()" class="dialog-btn">إضافة</button>
+                        <button onclick="closeCommentDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print Preview Dialog -->
+        <div id="printPreviewDialog" class="dialog" style="display: none;">
+            <div class="dialog-content print-preview-content">
+                <h3>معاينة الطباعة</h3>
+                <div class="print-preview-container">
+                    <div id="printPreviewContent" class="print-preview-area"></div>
+                </div>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="printScale">حجم العرض:</label>
+                        <select id="printScale" class="dialog-input">
+                            <option value="0.5">50%</option>
+                            <option value="0.75">75%</option>
+                            <option value="1" selected>100%</option>
+                            <option value="1.25">125%</option>
+                            <option value="1.5">150%</option>
+                        </select>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button onclick="printDocument()" class="dialog-btn"><i class="fa-solid fa-print"></i> طباعة</button>
+                        <button onclick="closePrintPreview()" class="dialog-btn">إغلاق</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Templates Dialog -->
+        <div id="templatesDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>قوالب جاهزة</h3>
+                <div class="templates-grid">
+                    <div class="template-item" onclick="applyTemplate('letter')">
+                        <div class="template-preview letter-template-preview"></div>
+                        <div class="template-title">رسالة رسمية</div>
+                    </div>
+                    <div class="template-item" onclick="applyTemplate('cv')">
+                        <div class="template-preview cv-template-preview"></div>
+                        <div class="template-title">سيرة ذاتية</div>
+                    </div>
+                    <div class="template-item" onclick="applyTemplate('report')">
+                        <div class="template-preview report-template-preview"></div>
+                        <div class="template-title">تقرير</div>
+                    </div>
+                    <div class="template-item" onclick="applyTemplate('memo')">
+                        <div class="template-preview memo-template-preview"></div>
+                        <div class="template-title">مذكرة</div>
+                    </div>
+                    <div class="template-item" onclick="applyTemplate('invoice')">
+                        <div class="template-preview invoice-template-preview"></div>
+                        <div class="template-title">فاتورة</div>
+                    </div>
+                    <div class="template-item" onclick="applyTemplate('article')">
+                        <div class="template-preview article-template-preview"></div>
+                        <div class="template-title">مقالة</div>
+                    </div>
+                </div>
+                <div class="dialog-buttons">
+                    <button onclick="closeTemplatesDialog()" class="dialog-btn">إغلاق</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paragraph Format Dialog -->
+        <div id="paragraphDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>تنسيق الفقرة</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="lineHeight">تباعد الأسطر:</label>
+                        <select id="lineHeight" class="dialog-input">
+                            <option value="1">مفرد (1)</option>
+                            <option value="1.15">1.15</option>
+                            <option value="1.5">1.5</option>
+                            <option value="2">مزدوج (2)</option>
+                            <option value="2.5">2.5</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="paragraphSpacingBefore">المسافة قبل الفقرة:</label>
+                        <input type="number" id="paragraphSpacingBefore" min="0" max="100" value="0" class="dialog-input"> بكسل
+                    </div>
+                    <div class="form-group">
+                        <label for="paragraphSpacingAfter">المسافة بعد الفقرة:</label>
+                        <input type="number" id="paragraphSpacingAfter" min="0" max="100" value="0" class="dialog-input"> بكسل
+                    </div>
+                    <div class="form-group">
+                        <label for="textIndent">المسافة البادئة للسطر الأول:</label>
+                        <input type="number" id="textIndent" min="0" max="100" value="0" class="dialog-input"> بكسل
+                    </div>
+                    <div class="form-group">
+                        <label for="rightIndent">المسافة البادئة من اليمين:</label>
+                        <input type="number" id="rightIndent" min="0" max="100" value="0" class="dialog-input"> بكسل
+                    </div>
+                    <div class="form-group">
+                        <label for="leftIndent">المسافة البادئة من اليسار:</label>
+                        <input type="number" id="leftIndent" min="0" max="100" value="0" class="dialog-input"> بكسل
+                    </div>
+                    <div class="dialog-buttons">
+                        <button onclick="applyParagraphFormat()" class="dialog-btn">تطبيق</button>
+                        <button onclick="closeParagraphDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Text Format Dialog -->
+        <div id="advancedTextDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>تنسيق النص المتقدم</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="letterSpacing">تباعد الأحرف:</label>
+                        <input type="range" id="letterSpacing" min="-2" max="10" value="0" step="0.5" class="dialog-input range-input">
+                        <span id="letterSpacingValue">0px</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="textShadow">تأثير الظل:</label>
+                        <div class="shadow-controls">
+                            <div class="shadow-input">
+                                <label>أفقي:</label>
+                                <input type="number" id="shadowX" min="-10" max="10" value="2" class="dialog-input">
+                            </div>
+                            <div class="shadow-input">
+                                <label>عمودي:</label>
+                                <input type="number" id="shadowY" min="-10" max="10" value="2" class="dialog-input">
+                            </div>
+                            <div class="shadow-input">
+                                <label>تمويه:</label>
+                                <input type="number" id="shadowBlur" min="0" max="10" value="3" class="dialog-input">
+                            </div>
+                            <div class="shadow-input">
+                                <label>لون:</label>
+                                <input type="color" id="shadowColor" value="#000000" class="dialog-input color-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="textTransform">تحويل النص:</label>
+                        <select id="textTransform" class="dialog-input">
+                            <option value="none">بدون تحويل</option>
+                            <option value="uppercase">أحرف كبيرة</option>
+                            <option value="lowercase">أحرف صغيرة</option>
+                            <option value="capitalize">بداية كل كلمة كبيرة</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="textDecoration">زخرفة النص:</label>
+                        <select id="textDecoration" class="dialog-input">
+                            <option value="none">بدون</option>
+                            <option value="underline">تحته خط</option>
+                            <option value="overline">فوقه خط</option>
+                            <option value="line-through">يتوسطه خط</option>
+                            <option value="underline overline">خط فوق وتحت</option>
+                        </select>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button onclick="applyAdvancedTextFormat()" class="dialog-btn">تطبيق</button>
+                        <button onclick="closeAdvancedTextDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced List Dialog -->
+        <div id="advancedListDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>تنسيق القوائم المتقدم</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="listType">نوع القائمة:</label>
+                        <select id="listType" class="dialog-input" onchange="toggleListOptions()">
+                            <option value="ul">قائمة نقطية</option>
+                            <option value="ol">قائمة رقمية</option>
+                        </select>
+                    </div>
+
+                    <!-- خيارات القائمة النقطية -->
+                    <div id="bulletListOptions" class="form-group">
+                        <label for="bulletStyle">نمط النقاط:</label>
+                        <select id="bulletStyle" class="dialog-input">
+                            <option value="disc">دائرة مصمتة ●</option>
+                            <option value="circle">دائرة مفرغة ○</option>
+                            <option value="square">مربع ■</option>
+                            <option value="disclosure-closed">مثلث ▶</option>
+                            <option value="'\\2605'">نجمة ★</option>
+                            <option value="'\\2714'">علامة صح ✔</option>
+                            <option value="'\\27A4'">سهم ➤</option>
+                        </select>
+                    </div>
+
+                    <!-- خيارات القائمة الرقمية -->
+                    <div id="numberedListOptions" class="form-group" style="display: none;">
+                        <label for="numberStyle">نمط الترقيم:</label>
+                        <select id="numberStyle" class="dialog-input">
+                            <option value="decimal">أرقام عربية (1, 2, 3)</option>
+                            <option value="decimal-leading-zero">أرقام مع صفر (01, 02, 03)</option>
+                            <option value="lower-alpha">حروف إنجليزية صغيرة (a, b, c)</option>
+                            <option value="upper-alpha">حروف إنجليزية كبيرة (A, B, C)</option>
+                            <option value="lower-roman">أرقام رومانية صغيرة (i, ii, iii)</option>
+                            <option value="upper-roman">أرقام رومانية كبيرة (I, II, III)</option>
+                            <option value="arabic-indic">أرقام عربية (١, ٢, ٣)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="listIndent">المسافة البادئة للقائمة:</label>
+                        <input type="number" id="listIndent" min="0" max="100" value="20" class="dialog-input"> بكسل
+                    </div>
+
+                    <div class="form-group">
+                        <label for="listItemSpacing">المسافة بين عناصر القائمة:</label>
+                        <input type="number" id="listItemSpacing" min="0" max="50" value="5" class="dialog-input"> بكسل
+                    </div>
+
+                    <div class="form-group">
+                        <label for="listStartNumber">
+                            <span id="startNumberLabel">رقم البداية:</span>
+                            <input type="number" id="listStartNumber" min="1" max="100" value="1" class="dialog-input">
+                        </label>
+                    </div>
+
+                    <div class="dialog-buttons">
+                        <button onclick="applyAdvancedList()" class="dialog-btn">تطبيق</button>
+                        <button onclick="closeAdvancedListDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header and Footer Dialog -->
+        <div id="headerFooterDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>الرأس والتذييل</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="headerText">نص الرأس:</label>
+                        <textarea id="headerText" class="dialog-input" rows="3" placeholder="أدخل نص الرأس هنا..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="footerText">نص التذييل:</label>
+                        <textarea id="footerText" class="dialog-input" rows="3" placeholder="أدخل نص التذييل هنا..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="headerAlignment">محاذاة الرأس:</label>
+                        <select id="headerAlignment" class="dialog-input">
+                            <option value="right">يمين</option>
+                            <option value="center" selected>وسط</option>
+                            <option value="left">يسار</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="footerAlignment">محاذاة التذييل:</label>
+                        <select id="footerAlignment" class="dialog-input">
+                            <option value="right">يمين</option>
+                            <option value="center" selected>وسط</option>
+                            <option value="left">يسار</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="includePageNumber">
+                            <input type="checkbox" id="includePageNumber" checked>
+                            تضمين رقم الصفحة في التذييل
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="includeDate">
+                            <input type="checkbox" id="includeDate">
+                            تضمين التاريخ في الرأس
+                        </label>
+                    </div>
+
+                    <div class="dialog-buttons">
+                        <button onclick="applyHeaderFooter()" class="dialog-btn">تطبيق</button>
+                        <button onclick="closeHeaderFooterDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Styles Dialog -->
+        <div id="documentStylesDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>أنماط المستند</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="documentTheme">سمة المستند:</label>
+                        <select id="documentTheme" class="dialog-input" onchange="previewDocumentTheme()">
+                            <option value="default">افتراضي</option>
+                            <option value="modern">عصري</option>
+                            <option value="elegant">أنيق</option>
+                            <option value="professional">احترافي</option>
+                            <option value="creative">إبداعي</option>
+                            <option value="academic">أكاديمي</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="colorScheme">نظام الألوان:</label>
+                        <select id="colorScheme" class="dialog-input" onchange="previewDocumentTheme()">
+                            <option value="default">افتراضي</option>
+                            <option value="blue">أزرق</option>
+                            <option value="green">أخضر</option>
+                            <option value="red">أحمر</option>
+                            <option value="purple">بنفسجي</option>
+                            <option value="orange">برتقالي</option>
+                            <option value="monochrome">أحادي اللون</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fontScheme">نظام الخطوط:</label>
+                        <select id="fontScheme" class="dialog-input" onchange="previewDocumentTheme()">
+                            <option value="default">افتراضي</option>
+                            <option value="traditional">تقليدي</option>
+                            <option value="modern">عصري</option>
+                            <option value="minimal">بسيط</option>
+                            <option value="decorative">زخرفي</option>
+                            <option value="arabic">عربي</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paragraphSpacing">تباعد الفقرات:</label>
+                        <select id="paragraphSpacing" class="dialog-input" onchange="previewDocumentTheme()">
+                            <option value="compact">متراص</option>
+                            <option value="normal" selected>عادي</option>
+                            <option value="relaxed">متباعد</option>
+                            <option value="double">مزدوج</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stylePreview">معاينة:</label>
+                        <div id="stylePreview" class="style-preview">
+                            <div class="preview-heading">عنوان المستند</div>
+                            <div class="preview-subheading">عنوان فرعي</div>
+                            <div class="preview-paragraph">هذا نص تجريبي لمعاينة نمط المستند. يمكنك من خلال هذه المعاينة رؤية كيف سيبدو المستند بعد تطبيق النمط المختار.</div>
+                        </div>
+                    </div>
+
+                    <div class="dialog-buttons">
+                        <button onclick="applyDocumentStyle()" class="dialog-btn">تطبيق</button>
+                        <button onclick="closeDocumentStylesDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Watermark Dialog -->
+        <div id="watermarkDialog" class="dialog" style="display: none;">
+            <div class="dialog-content">
+                <h3>علامة مائية</h3>
+                <div class="dialog-form">
+                    <div class="form-group">
+                        <label for="watermarkType">نوع العلامة المائية:</label>
+                        <select id="watermarkType" class="dialog-input" onchange="toggleWatermarkOptions()">
+                            <option value="text">نص</option>
+                            <option value="image">صورة</option>
+                        </select>
+                    </div>
+
+                    <div id="textWatermarkOptions">
+                        <div class="form-group">
+                            <label for="watermarkText">النص:</label>
+                            <input type="text" id="watermarkText" class="dialog-input" value="مسودة" placeholder="أدخل نص العلامة المائية">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="watermarkFont">الخط:</label>
+                            <select id="watermarkFont" class="dialog-input">
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Tahoma">Tahoma</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="watermarkSize">الحجم:</label>
+                            <input type="range" id="watermarkSize" min="20" max="100" value="50" class="dialog-input range-input">
+                            <span id="watermarkSizeValue">50px</span>
+                        </div>
+                    </div>
+
+                    <div id="imageWatermarkOptions" style="display: none;">
+                        <div class="form-group">
+                            <label for="watermarkImage">الصورة:</label>
+                            <input type="file" id="watermarkImage" class="dialog-input" accept="image/*">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="watermarkOpacity">الشفافية:</label>
+                            <input type="range" id="watermarkOpacity" min="10" max="100" value="30" class="dialog-input range-input">
+                            <span id="watermarkOpacityValue">30%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="watermarkColor">اللون:</label>
+                        <input type="color" id="watermarkColor" value="#cccccc" class="dialog-input color-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="watermarkRotation">الدوران:</label>
+                        <input type="range" id="watermarkRotation" min="-45" max="45" value="-30" class="dialog-input range-input">
+                        <span id="watermarkRotationValue">-30°</span>
+                    </div>
+
+                    <div class="dialog-buttons">
+                        <button onclick="applyWatermark()" class="dialog-btn">تطبيق</button>
+                        <button onclick="removeWatermark()" class="dialog-btn">إزالة</button>
+                        <button onclick="closeWatermarkDialog()" class="dialog-btn">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
